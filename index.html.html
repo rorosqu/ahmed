@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>تقويم وحساب دوران أوقات الفلج</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f1e4;--card:#fff;--tx:#17352b;--pr:#0b6b4f;--gd:#c8942b;--ln:#e6dcc3;--hl:#fff1c7;--sq:#e3f4ec;--hd:#0b6b4f;--ht:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1a15;--card:#162620;--tx:#eaf3ee;--pr:#3fc59a;--gd:#e2b04a;--ln:#2a4136;--hl:#4a3d14;--sq:#173b2e;--hd:#0f4d3a;--ht:#fff;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1a15;--card:#162620;--tx:#eaf3ee;--pr:#3fc59a;--gd:#e2b04a;--ln:#2a4136;--hl:#4a3d14;--sq:#173b2e;--hd:#0f4d3a;--ht:#fff;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:Tajawal,Tahoma,Arial,sans-serif;font-size:16px}
+header{background:linear-gradient(135deg,var(--hd),#0a3d2e);color:var(--ht);text-align:center;padding:16px 12px 10px;position:relative;border-bottom:4px solid var(--gd)}
+h1{margin:0;font-size:clamp(20px,5vw,32px);font-weight:800}
+.cr{margin:6px auto 0;font-size:clamp(15px,3.8vw,21px);font-weight:800;color:#f4d27a;letter-spacing:.5px;display:inline-block;padding:2px 22px;border-top:1px solid #f4d27a99;border-bottom:1px solid #f4d27a99}
+.lk{position:absolute;top:12px;inset-inline-start:12px;border:0;background:#ffffff26;color:#fff;border-radius:50%;width:42px;height:42px;font-size:20px;cursor:pointer}
+.lk.open{background:var(--gd)}
+.mq{overflow:hidden;background:#06281e;padding:7px 0;margin:10px -12px -10px;white-space:nowrap}
+.mq span{display:inline-block;font-size:23px;font-weight:800;text-shadow:0 1px 3px #0008;animation:mv 36s linear infinite}
+@keyframes mv{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+nav{display:flex;gap:6px;padding:10px;overflow-x:auto;position:sticky;top:0;background:var(--bg);z-index:5}
+nav button{flex:1;white-space:nowrap;border:1px solid var(--ln);background:var(--card);color:var(--tx);padding:9px 14px;border-radius:22px;font:inherit;font-weight:700;cursor:pointer}
+nav button.on{background:var(--pr);color:#fff;border-color:var(--pr)}
+main{max-width:1100px;margin:auto;padding:0 10px 30px}
+.pg{display:none}.pg.on{display:block}
+.card{background:var(--card);border:1px solid var(--ln);border-radius:16px;padding:14px;margin-bottom:14px;box-shadow:0 2px 8px #0000000d}
+.card h2{margin:0 0 10px;font-size:19px;color:var(--pr)}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px}
+#clk{font-size:clamp(34px,10vw,52px);font-weight:800;color:var(--pr);direction:ltr;text-align:center}
+.big{font-size:18px;text-align:center;margin:4px 0}.pill{display:inline-block;background:var(--gd);color:#fff;border-radius:14px;padding:3px 14px;font-weight:800}
+.inf{background:var(--sq);border-radius:12px;padding:10px;margin-top:8px;text-align:center}
+input,select,button.b{font:inherit;padding:9px 12px;border-radius:10px;border:1px solid var(--ln);background:var(--card);color:var(--tx)}
+button.b{background:var(--pr);color:#fff;border:0;font-weight:700;cursor:pointer}
+button.b.g{background:var(--gd)}button.b.r{background:#b8453a}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;align-items:center}
+.tools input{flex:1;min-width:150px}
+.tw{overflow:auto;max-height:70vh;border:1px solid var(--ln);border-radius:12px}
+table{border-collapse:collapse;width:100%;min-width:760px;background:var(--card)}
+th{position:sticky;top:0;background:var(--hd);color:#fff;padding:9px 6px;font-size:14px}
+td{border-bottom:1px solid var(--ln);padding:7px 6px;text-align:center;font-size:15px}
+tr.irr td{background:var(--sq)}tr.today td{background:var(--hl);font-weight:800}
+td[contenteditable="true"]{outline:1px dashed var(--gd);outline-offset:-3px;background:var(--card)}
+.sm{font-size:14px;opacity:.8}
+#md{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;z-index:30}
+#md div{background:var(--card);padding:20px;border-radius:16px;width:min(320px,90%);text-align:center}
+#md input{width:100%;margin:10px 0;text-align:center}
+#ts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:9px 18px;border-radius:20px;display:none;z-index:40}
+.wh path.hi{stroke:var(--gd);stroke-width:4}
+.tc{background:linear-gradient(145deg,#10243f,#1c4573 55%,#3a2a7a);color:#fff;border:0;text-align:center;padding:22px 14px}.tcl{font-size:15px;opacity:.85;letter-spacing:1px}.tc #clk{color:#fff;text-shadow:0 0 18px #6ec1ff99;font-size:clamp(40px,12vw,64px);margin:6px 0 14px}.tcd{display:inline-flex;gap:8px;align-items:center;background:#ffffff1f;border:1px solid #ffffff40;border-radius:30px;padding:8px 18px;font-size:18px;font-weight:700}.tcf{margin-top:14px;font-size:17px}.tc .pill{background:linear-gradient(135deg,#f4c34a,#e8920c);color:#2b1a00;padding:4px 18px;margin-inline-start:6px}.tci{margin-top:12px;background:#ffffff1a;border-radius:12px;padding:10px;font-size:15px}
+.cc{border:0;color:#fff}.cc h2{color:#fff}.c1{background:linear-gradient(145deg,#5b2a86,#b0409a)}.c2{background:linear-gradient(145deg,#b8390c,#e8751a)}.ci{width:100%;margin:6px 0 10px;background:#fff;color:#222;border:0;font-size:18px;text-align:center}.res{background:#ffffff26;border:1px solid #ffffff55;border-radius:12px;padding:14px;text-align:center;font-size:18px;font-weight:800}.rule{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}.rule span{background:#ffffff2e;border-radius:12px;padding:3px 10px;font-size:14px}.lb{font-weight:700}
+.cy{padding-top:10px}.cy h2{text-align:center;font-size:30px;margin:6px 0 14px}.cy td{font-size:16px;padding:10px 6px}.cy .dr{font-size:16px}.cyA{border-top:6px solid #2563a8}.cyA h2{color:#2563a8}.cyA th{background:#2563a8}.cyA tr.wt td{background:#2563a833}.cyB{border-top:6px solid #8e3b8e}.cyB h2{color:#a04aa0}.cyB th{background:#8e3b8e}.cyB tr.wt td{background:#8e3b8e33}.dr{color:#0a8bd0;font-weight:800}
+.tcf{margin-top:34px}.tci{margin-top:16px;font-size:17px}.al{color:#ff4545;font-weight:800;font-size:21px;text-shadow:0 0 8px #ff1f1f,0 0 20px #ff1f1f;animation:gl 1s ease-in-out infinite alternate;margin-inline-end:8px}@keyframes gl{from{opacity:.5}to{opacity:1}}
+.cy2 table{width:100%;min-width:0;table-layout:fixed}.cy2 th{font-size:22px;padding:14px 6px}.cy2 th.n{width:46px;background:#555}.cy2 .ha{background:#2563a8}.cy2 .hb{background:#8e3b8e}.cy2 td{font-size:17px;padding:12px 6px;vertical-align:middle;border-inline-start:1px solid var(--ln)}.cy2 td.wa{background:#2563a833}.cy2 td.wb{background:#8e3b8e33}.cy2 .dr{margin-top:3px}
+.rf{text-align:center;color:#fff;border:0;background:linear-gradient(145deg,#0f5c73,#1a8aa6)}.rf2{background:linear-gradient(145deg,#7a3b0c,#d1792a)}.rl{font-size:17px;opacity:.92}.rv{font-size:34px;font-weight:800;margin-top:6px}
+.qr{background:linear-gradient(145deg,#12263f,#1c4573 60%,#3a2a7a);color:#fff;border-radius:14px;padding:16px;text-align:center;margin-top:10px}.qh{font-size:22px;font-weight:800}.qf{margin:10px 0;font-size:18px}.qr .pill{background:linear-gradient(135deg,#f4c34a,#e8920c);color:#2b1a00}.qi{background:#ffffff1f;border-radius:12px;padding:12px;font-size:18px;line-height:1.8}.ql th{background:#0f5c73}.ql tr.irr td{background:#1a8aa622}
+.lb2{font-weight:800;min-width:82px;color:var(--pr)}
+.fxh{background:linear-gradient(135deg,#0f5c73,#6a3a9a);color:#fff;border-radius:16px;padding:16px;text-align:center;font-size:clamp(20px,5vw,26px);font-weight:800;margin-bottom:14px;box-shadow:0 4px 14px #0f5c7344}#fx .rv{font-size:38px}#fx .tools{background:#0f5c7316;border:1px solid #0f5c7344;border-radius:14px;padding:12px}#fx .tools input,#fx .tools select{font-size:17px;padding:11px}#fx .lb2{color:#0f7a9a}#qb{padding:11px 30px;background:linear-gradient(135deg,#0f5c73,#7a3b8f);font-size:17px}
+.ov{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;z-index:30}.bx{background:var(--card);padding:20px;border-radius:16px;width:min(340px,90%);display:flex;flex-direction:column;gap:10px;text-align:center}.bx button{width:100%}
+@media print{@page{size:A4;margin:10mm}html:root:not([data-theme="light"]),html:root[data-theme="dark"]{--bg:#fff;--card:#fff;--tx:#000;--ln:#999;--hl:#fff3b0;--sq:#e6eef7;--hd:#1f3b57;color-scheme:light}body{background:#fff;color:#000;font-size:12px}main{padding:0;max-width:none}.card{box-shadow:none;border:0;padding:0;margin:0}.tw{border:0;max-height:none;overflow:visible}table{min-width:0!important;width:100%}th{position:static;background:#1f3b57!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-size:12px}td{font-size:12px;padding:5px 4px;border:1px solid #999}tr{page-break-inside:avoid}tr.irr td,tr.today td{-webkit-print-color-adjust:exact;print-color-adjust:exact}html body th:last-child,html body td:last-child{display:table-cell}#p2::before{content:"جدول دوران أوقات الفلج — تصميم أحمد بن سعيد الشبيبي";display:block;text-align:center;font-weight:800;font-size:16px;margin-bottom:8px}.fxh,.rf,.qr{background:#fff!important;color:#000!important;border:1px solid #888;box-shadow:none;text-shadow:none}.ql th{background:#1f3b57!important}.ov{display:none!important}}
+.kd{padding:0;overflow:hidden}.dh{background:linear-gradient(135deg,#fff6bf,#ffe98a);color:#5a3b00;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:13px 16px;font-size:21px;font-weight:800}.dh span{background:#ffffffb3;border:1px solid #d4aa2a;border-radius:14px;padding:3px 14px;font-size:16px;white-space:nowrap}.kb{padding:12px;display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}.kb h3{margin:0 0 8px;font-size:16px;color:#2a9cc4}.kt{min-width:0;width:100%}.kt th{background:#0b5d73;font-size:14px;position:static}.kt td{padding:11px 8px;font-size:17px;font-weight:700;border-bottom:1px solid var(--ln)}.kt tbody tr:nth-child(even) td{background:#2a9cc414}.kt th{font-size:15px;padding:11px 6px}.kt td.e:first-child{color:var(--tx)}.ord{display:inline-block;min-width:64px;font-size:15px;background:#c2410c;color:#fff;border-radius:12px;padding:2px 10px;font-weight:800;font-size:14px}
+nav{gap:10px;padding:14px 10px 12px;scrollbar-width:none}nav::-webkit-scrollbar{display:none}
+nav button{flex:1 0 auto;min-width:104px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 12px 11px;border-radius:18px;border:0;border-bottom:4px solid var(--a);background:var(--card);color:var(--tx);font-family:inherit;font-weight:800;font-size:15px;line-height:1.3;white-space:normal;text-align:center;box-shadow:0 3px 10px #0000001f;transition:transform .2s,box-shadow .2s}
+nav button i{font-style:normal;width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-size:23px;background:linear-gradient(135deg,var(--a),var(--b));box-shadow:0 3px 8px #0003}
+nav button b{font-weight:800}
+nav button.on{background:linear-gradient(135deg,var(--a),var(--b));color:#fff;border-color:transparent;border-bottom:4px solid #ffffff80;transform:translateY(-3px);box-shadow:0 9px 20px #0000003d;text-shadow:0 1px 2px #0004}
+nav button.on i{background:#ffffff3d;box-shadow:none}
+nav button:active{transform:scale(.96)}
+.ed{display:none}.open-ed .ed{display:inline-block}
+@page{size:A4 landscape;margin:10mm}@media print{header,nav,.tools,.noprint,.ed,#ts,#md,.fxh,#fx .card:not(.ql),#fx .g2,#fx p{display:none!important}body{background:#fff;color:#000}.pg{display:none}#p2{display:block!important}.card{box-shadow:none;border:0;padding:0}.tw{max-height:none!important;overflow:visible!important;border:0}table{min-width:0!important;width:100%}th{position:static;background:#0b6b4f!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}td,th{font-size:10.5pt;padding:4px}tr{break-inside:avoid}thead{display:table-header-group}tr.irr td{background:#e3f4ec!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}body::before{content:"تقويم وحساب دوران أوقات الفلج — تصميم أحمد بن سعيد الشبيبي";display:block;text-align:center;font-weight:800;font-size:15pt;margin-bottom:8px}}
+</style>
+</head>
+<body>
+<header>
+<button class="lk" id="lk" title="التعديل" aria-label="فتح أو قفل التعديل">🔒</button>
+<h1>تقويم وحساب دوران أوقات الفلج</h1>
+<div class="cr">تصميم أحمد بن سعيد الشبيبي</div>
+<div class="mq"><span><b style="color:#f4d27a">اللهم اغفر لأبي حمد وارحمه 🤲🏻</b> &nbsp;&nbsp;✦&nbsp;&nbsp; <b style="color:#5be0b0">اللهم عافه واعفُ عنه 🤲🏻</b> &nbsp;&nbsp;✦&nbsp;&nbsp; <b style="color:#ff8fae">اللهم أكرِم نُزله ووسع مُدخله 🤲🏻</b> &nbsp;&nbsp;✦&nbsp;&nbsp; <b style="color:#7cc7ff">اللهم نقِّه من الخطايا كما يُنقى الثوب الأبيض من الدنس 🤲🏻</b> &nbsp;&nbsp;✦&nbsp;&nbsp; </span></div>
+</header>
+<nav id="nv"><button data-p="p1" class="on" style="--a:#f59e0b;--b:#ea580c"><i>🏠</i><b>الرئيسية</b></button><button data-p="p2" style="--a:#2563eb;--b:#0ea5e9"><i>💧</i><b>أيام السقي من الفلج</b></button><button data-p="p3" style="--a:#7c3aed;--b:#d946ef"><i>⏳</i><b>حاسبة الآثار</b></button><button data-p="p4" style="--a:#e11d48;--b:#fb7185"><i>📅</i><b>أيام الفلج</b></button><button data-p="p6" style="--a:#0f766e;--b:#14b8a6"><i>📜</i><b>الأدوار في السقي والقعد</b></button></nav>
+<main>
+<section class="pg on" id="p1">
+<div class="g2">
+<div class="card tc"><div class="tcl">🕒 الوقت الآن</div><div id="clk">--</div><div class="tcd"><span>📅</span><span id="gd"></span></div><div class="tcf">يوم الفلج <b class="pill" id="fd"></b></div><div class="tci" id="ti"></div></div>
+<div class="card"><h2>دوران أوقات الفلج</h2><svg class="wh" id="wh" viewBox="0 0 600 600" style="width:100%;max-width:620px;display:block;margin:auto"></svg></div>
+</div></section>
+
+<section class="pg" id="p2">
+<div class="card">
+<div class="tools">
+<select id="sm"><option value="d">بحث بالتاريخ</option><option value="f">بحث بيوم الفلج</option><option value="s">بحث بوقت السقي</option><option value="a">بحث بعدد الآثار</option><option value="r">📆 حساب الفلج لأيام أخرى</option></select>
+<input id="sq" placeholder="مثال: 22/1/2026" autocomplete="off">
+<select id="sf"><option value="all">جميع الأيام</option><option value="irr">💧 أيام السقي</option><option value="no">أيام بدون سقي</option></select>
+</div>
+<div class="tools">
+<button class="b g ed" id="ad">＋ إضافة صف</button>
+<button class="b r" id="rs">↺ إعادة ضبط</button>
+<button class="b" id="pr">🖨 طباعة</button><button class="b g" id="pf">📄 ملف للطباعة</button>
+<button class="b" id="ex">📊 تصدير إلى إكسل</button>
+<span class="sm" id="cn"></span>
+</div>
+<div class="tw"><table><thead><tr><th>#</th><th>التاريخ الميلادي</th><th>يوم الأسبوع</th><th>يوم الفلج</th><th>وقت السقي</th><th>عدد الآثار</th><th>الوقت</th><th>ملاحظات</th><th class="ed"></th></tr></thead><tbody id="tb"></tbody></table></div>
+</div></section>
+
+<section class="pg" id="p3">
+<div class="g2">
+<div class="card cc c1"><h2>⏳ حاسبة الآثار</h2><div class="rule"><span>أثر واحد = 30 دقيقة</span><span>نصف أثر = 15 دقيقة</span></div>
+<input id="a1" class="ci" placeholder="عدد الآثار مثال: 3.5"><div class="res" id="r1">أدخل عدد الآثار</div></div>
+<div class="card cc c2"><h2>🕑 ساعة نهاية السقي</h2>
+<label class="lb">ساعة بداية الفلج</label><input type="time" id="t2" class="ci" value="06:00">
+<input id="a2" class="ci" placeholder="عدد الآثار مثال: 8"><div class="res" id="r2">أدخل البيانات</div></div>
+</div></section>
+
+<section class="pg" id="p4"><div id="nt2" class="g2"></div><div hidden><div class="card"><h2>x</h2>
+<div class="tw"><table style="min-width:0"><thead><tr><th>اسم اليوم</th><th>ترتيبه في دورة A</th><th>ترتيبه في دورة B</th></tr></thead><tbody id="nt"></tbody></table></div></div></section>
+<section class="pg" id="p5"><div class="g2"><div class="card rf"><div class="rl">📅 التاريخ المرجعي للحساب</div><div class="rv" dir="ltr">20/08/2026</div></div><div class="card rf rf2"><div class="rl">💧 يوم الفلج المرجعي</div><div class="rv">السبت 3 (A)</div></div></div>
+<div class="card"><h2>🗓 اختر الفترة (من تاريخ — إلى تاريخ)</h2><p class="sm">الحساب يعتمد على التاريخ المرجعي (20/08/2026 = السبت 3 A وهو يوم الخميس)، وأوقات السقي المعطاة هي لأول دورة (من 18/08/2026)، ثم تتغير كل 20 يومًا بالتسلسل، قبل المرجع وبعده لأي عدد من السنين.</p>
+<div class="tools"><span class="lb2">من تاريخ</span><input id="qdd" inputmode="numeric" placeholder="اليوم" maxlength="2" autocomplete="off" style="flex:0 0 80px;min-width:0;text-align:center"><select id="qmm"><option value="1">يناير</option><option value="2">فبراير</option><option value="3">مارس</option><option value="4">أبريل</option><option value="5">مايو</option><option value="6">يونيو</option><option value="7">يوليو</option><option value="8">أغسطس</option><option value="9">سبتمبر</option><option value="10">أكتوبر</option><option value="11">نوفمبر</option><option value="12">ديسمبر</option></select><input id="qyy" inputmode="numeric" placeholder="السنة" maxlength="4" autocomplete="off" style="flex:0 0 100px;min-width:0;text-align:center"><div style="flex-basis:100%"></div><span class="lb2">إلى تاريخ</span><input id="qd2" inputmode="numeric" placeholder="اليوم" maxlength="2" autocomplete="off" style="flex:0 0 80px;min-width:0;text-align:center"><select id="qm2"></select><input id="qy2" inputmode="numeric" placeholder="السنة" maxlength="4" autocomplete="off" style="flex:0 0 100px;min-width:0;text-align:center"><div style="flex-basis:100%"></div><select id="qy"><option value="irr">💧 أيام السقي فقط</option><option value="all">جميع الأيام</option></select><button class="b" id="qb">احسب</button></div>
+<div class="qr" id="qr"></div></div>
+<div class="card ql"><h2 id="qt"></h2><div class="tw"><table><thead><tr><th>التاريخ</th><th>اليوم</th><th>يوم الفلج</th><th>وقت السقي</th><th>الآثار</th><th>الوقت</th></tr></thead><tbody id="qlb"></tbody></table></div></div></section>
+<section class="pg" id="p6"><div id="kd"></div></section>
+</main>
+<div id="md"><div><b>أدخل الرقم السري</b><input type="password" id="pw" autocomplete="off"><div id="pe" style="color:#d33;min-height:20px"></div><button class="b" id="po">فتح</button> <button class="b r" id="pc">إلغاء</button></div></div>
+<div class="ov" id="pm"><div class="bx"><b>🖨 الطباعة</b><button class="b" id="pp1">🖨 طباعة مباشرة</button><button class="b g" id="pp2">📄 ملف جاهز للطباعة (للهاتف والحاسب)</button><button class="b r" id="pp3">إغلاق</button></div></div>
+<div id="ts"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const $=s=>document.querySelector(s),AR='٠١٢٣٤٥٦٧٨٩';
+const dg=s=>String(s).replace(/[٠-٩]/g,d=>AR.indexOf(d));
+const nr=s=>dg(s).toLowerCase().replace(/[\u064B-\u065F]/g,'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/[\s()\[\]\-_]/g,'');
+const ROT=[['طلع الشمس',6],['سلم الشمس',18],['نصف النهار',12],['نصف الليل',0],['قضيان ربع من النهار',9],['قضيان ربع من الليل',21],['آخر النهار',15],['آخر الليل',3]];
+const NX={'طلع الشمس':'قضيان ربع من النهار','قضيان ربع من النهار':'نصف النهار','نصف النهار':'آخر النهار','آخر النهار':'سلم الشمس','سلم الشمس':'قضيان ربع من الليل','قضيان ربع من الليل':'نصف الليل','نصف الليل':'آخر الليل','آخر الليل':'طلع الشمس'};
+const DN=['السبت الأولية','السبت الوسطية','السبت الآخرية','الأحد','الإثنين','الثلاثاء','البادة','الأربعاء','الخميس','الجمعة'];
+const WD=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+const BASE={2:[5,6],3:[1,4],7:[3,8],9:[7,3],13:[5,6],16:[4,1.5],19:[2,3.5]};
+const T0=Date.UTC(2026,7,18),TE=Date.UTC(2027,11,31),DAY=864e5;
+const fm=h=>{h=((h%24)+24)%24;const m=h>=12?'م':'ص';return(h%12||12)+':00 '+m};
+const fh=(h,mi)=>{h=((h%24)+24)%24;return((h%12)||12)+':'+String(mi).padStart(2,'0')+' '+(h>=12?'م':'ص')};
+function an(t){t=dg(t);let m=t.match(/\d+(\.\d+)?/),n=m?+m[0]:/ثلاث/.test(t)?3:/أثر|اثر/.test(t)?1:0;if(/ونصف/.test(t)&&!(m&&m[1]))n+=.5;return n}
+function at(n){return n==1.5?'أثر ونصف':n==3.5?'ثلاث آثار ونصف':n==1?'أثر واحد':n+' آثار'}
+function calc(s,a){let nm=s.split('+').map(x=>x.trim()).filter(Boolean);if(!nm.length)return null;
+const f=x=>{const q=nr(x);return ROT.find(r=>nr(r[0])==q)||(q.length>3?ROT.find(r=>nr(r[0]).includes(q)):0)};
+let l=nm.map(f);if(l.some(x=>!x))return null;
+if(an(a)==8&&nm.length==1){l.push(ROT.find(r=>r[0]==NX[l[0][0]]))}
+const sh=h=>{h=((h%24)+24)%24;return((h%12)||12)+(h>=12?'م':'ص')};return{s:l.map(x=>x[0]).join(' + '),tm:l.map(x=>sh(x[1])+'-'+sh(x[1]+3)).join(' + ')}}
+function build(){const o=[],c={};for(let t=T0;t<=TE;t+=DAY){const d=new Date(t),i=Math.round((t-T0)/DAY)%20;
+const r={d:d.getUTCDate()+'/'+(d.getUTCMonth()+1)+'/'+d.getUTCFullYear(),w:WD[d.getUTCDay()],f:DN[i%10]+(i<10?' (A)':' (B)'),s:'',a:'',tm:'',n:''};
+if(BASE[i]){const k=c[i]=(c[i]??-1)+1,b=BASE[i];r.s=ROT[(b[0]+k)%8][0];r.a=at(b[1]);const x=calc(r.s,r.a);r.s=x.s;r.tm=x.tm}o.push(r)}return o}
+let rows=build(),locked=true;
+const dk=s=>(dg(s).match(/\d+/g)||[]).map(Number).join('/');
+const tdy=(()=>{const d=new Date();return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear()})();
+function match(r,m,q){if(!q)return true;
+if(m=='d'){const n=dg(q).match(/\d+/g)||[];return n.length>=3?dk(r.d)==n.slice(0,3).map(Number).join('/'):dg(r.d).includes(dg(q).trim())}
+if(m=='f')return nr(r.f).includes(nr(q));
+if(m=='s')return nr(r.s).includes(nr(q));
+const n=an(q);return n>0?Math.abs(an(r.a)-n)<.01:nr(r.a).includes(nr(q))}
+function render(){const m=$('#sm').value,q=$('#sq').value.trim(),f=$('#sf').value;let h='',c=0;const ce=locked?'false':'true';
+rows.forEach((r,i)=>{if(f=='irr'&&!r.s||f=='no'&&r.s||!match(r,m,q))return;c++;
+h+=`<tr data-i="${i}" class="${r.s?'irr':''} ${dk(r.d)==dk(tdy)?'today':''}"><td>${i+1}</td>`+['d','w','f','s','a','tm','n'].map(k=>`<td data-k="${k}" contenteditable="${ce}" spellcheck="false">${r[k]}</td>`).join('')+`<td class="ed"><button class="b r" data-del="${i}" style="padding:3px 9px">✕</button></td></tr>`});
+$('#tb').innerHTML=h;$('#cn').textContent='عدد الصفوف: '+c;
+document.body.classList.toggle('open-ed',!locked)}
+$('#tb').addEventListener('focusout',e=>{const td=e.target.closest('td[data-k]');if(!td||locked)return;const tr=td.parentNode,r=rows[tr.dataset.i],k=td.dataset.k;r[k]=td.textContent.trim();
+if(k=='s'||k=='a'){const x=calc(r.s,r.a);if(x){r.s=x.s;r.tm=x.tm;tr.children[5].textContent=r.s;tr.children[7].textContent=r.tm}tr.classList.toggle('irr',!!r.s)}});
+$('#tb').addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(b&&confirm('حذف هذا الصف؟')){rows.splice(+b.dataset.del,1);render()}});
+['#sm','#sf'].forEach(s=>$(s).onchange=()=>{const m=$('#sm').value;$('#sq').placeholder={d:'مثال: 22/1/2026',f:'مثال: البادة A',s:'مثال: نصف الليل',a:'مثال: 8 أو ٨'}[m];render()});
+$('#sq').oninput=render;
+$('#ad').onclick=()=>{$('#sf').value='all';$('#sq').value='';rows.push({d:'',w:'',f:'',s:'',a:'',tm:'',n:''});render();$('.tw').scrollTop=1e9};
+$('#rs').onclick=()=>{if(confirm('إعادة الجدول إلى الوضع الأصلي؟')){rows=build();$('#sq').value='';$('#sf').value='all';render();ts('تمت إعادة الضبط')}};
+$('#pr').onclick=()=>window.print();
+$('#ex').onclick=()=>{const hd=['#','التاريخ الميلادي','يوم الأسبوع','يوم الفلج','وقت السقي','عدد الآثار','الوقت','ملاحظات'];
+const html='<html dir="rtl"><head><meta charset="utf-8"></head><body><table border="1"><tr>'+hd.map(x=>'<th>'+x+'</th>').join('')+'</tr>'+rows.map((r,i)=>'<tr><td>'+(i+1)+'</td>'+['d','w','f','s','a','tm','n'].map(k=>'<td>'+r[k]+'</td>').join('')+'</tr>').join('')+'</table></body></html>';
+try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+html],{type:'application/vnd.ms-excel'}));a.download='falaj.xls';document.body.appendChild(a);a.click();a.remove();ts('جارٍ تصدير الملف')}
+catch(x){const t=[hd.join('\t')].concat(rows.map((r,i)=>[i+1,r.d,r.w,r.f,r.s,r.a,r.tm,r.n].join('\t'))).join('\n');navigator.clipboard&&navigator.clipboard.writeText(t);ts('تم نسخ الجدول، الصقه في إكسل')}};
+function ts(t){const e=$('#ts');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2500)}
+// lock
+$('#lk').onclick=()=>{if(!locked){locked=true;$('#lk').textContent='🔒';$('#lk').classList.remove('open');render();ts('تم قفل التعديل')}else{$('#md').style.display='flex';$('#pw').value='';$('#pe').textContent='';$('#pw').focus()}};
+const ok=()=>{if($('#pw').value==='falaj'){locked=false;$('#md').style.display='none';$('#lk').textContent='🔓';$('#lk').classList.add('open');render();ts('تم فتح التعديل')}else $('#pe').textContent='الرقم السري غير صحيح'};
+$('#po').onclick=ok;$('#pw').onkeydown=e=>{if(e.key=='Enter')ok()};$('#pc').onclick=()=>$('#md').style.display='none';
+// nav
+$('#nv').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('.pg,#nv button').forEach(x=>x.classList.remove('on'));b.classList.add('on');$('#'+b.dataset.p).classList.add('on')};
+// wheel
+const COL=['#f2b134','#e8743b','#e5b21c','#3b5f9e','#6fb36a','#6a55a8','#d98a2b','#2f4a82'];
+(function(){let h='';ROT.forEach((r,i)=>{const a0=(-90+i*45)*Math.PI/180,a1=(-90+(i+1)*45)*Math.PI/180,R=170,x0=180+R*Math.cos(a0),y0=180+R*Math.sin(a0),x1=180+R*Math.cos(a1),y1=180+R*Math.sin(a1),am=(a0+a1)/2,tx=180+112*Math.cos(am),ty=180+112*Math.sin(am);
+const w=r[0].startsWith('قضيان')?[r[0].slice(0,9),r[0].slice(10)]:[r[0]];
+h+=`<path data-s="${r[1]}" d="M180 180L${x0} ${y0}A${R} ${R} 0 0 1 ${x1} ${y1}Z" fill="${COL[i]}" stroke="#fff" stroke-width="2"/><text x="${tx}" y="${ty-(w.length)*6}" text-anchor="middle" fill="#fff" font-size="12" font-weight="800">${w.map((t,j)=>`<tspan x="${tx}" dy="${j?14:0}">${t}</tspan>`).join('')}<tspan x="${tx}" dy="14" font-size="10" font-weight="400">${fm(r[1]).replace(':00','')}-${fm(r[1]+3).replace(':00','')}</tspan></text>`});
+h+='<circle cx="180" cy="180" r="38" fill="var(--card)" stroke="var(--gd)" stroke-width="3"/><text x="180" y="177" text-anchor="middle" fill="var(--pr)" font-size="13" font-weight="800">دوران</text><text x="180" y="194" text-anchor="middle" fill="var(--pr)" font-size="13" font-weight="800">الفلج</text>';$('#wh').innerHTML=h})();
+(function(){const cx=230,cy=200,R=108,r0=40,K=['#d98f1a','#d9622b','#b8860b','#3b5f9e','#3f9a5a','#6a55a8','#c4741c','#2f4a82'];let h='';
+ROT.forEach((r,i)=>{const a0=(-90+i*45)*Math.PI/180,a1=a0+Math.PI/4,am=(a0+a1)/2,P=(a,q)=>(cx+q*Math.cos(a)).toFixed(1)+' '+(cy+q*Math.sin(a)).toFixed(1);
+const c=Math.cos(am),s=Math.sin(am),w=r[0].startsWith('قضيان')?[r[0].slice(0,9),r[0].slice(10)]:[r[0]],tm=fm(r[1]).replace(':00','')+' - '+fm(r[1]+3).replace(':00',''),L=w.concat([tm]);
+const lx=cx+(R+14)*c,ly=cy+(R+14)*s,an=c>.3?'start':c<-.3?'end':'middle',y0=ly-L.length*8+10+(Math.abs(c)<.3?(s<0?-14:12):0),np=P(am,74).split(' ');
+h+=`<path data-s="${r[1]}" d="M${P(a0,R)}A${R} ${R} 0 0 1 ${P(a1,R)}L${P(a1,r0)}A${r0} ${r0} 0 0 0 ${P(a0,r0)}Z" fill="${K[i]}" stroke="var(--card)" stroke-width="2"/><text x="${np[0]}" y="${np[1]}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="20" font-weight="800">${i+1}</text><text x="${lx.toFixed(1)}" y="${y0.toFixed(1)}" text-anchor="${an}" fill="var(--tx)" font-size="14" font-weight="800">${L.map((t,j)=>`<tspan x="${lx.toFixed(1)}" dy="${j?16:0}"${j==L.length-1?' font-size="12" font-weight="400" opacity=".8"':''}>${t}</tspan>`).join('')}</text>`});
+h+=`<circle cx="${cx}" cy="${cy}" r="${r0-2}" fill="var(--card)" stroke="var(--gd)" stroke-width="3"/><text x="${cx}" y="${cy-3}" text-anchor="middle" fill="var(--pr)" font-size="13" font-weight="800">دوران</text><text x="${cx}" y="${cy+14}" text-anchor="middle" fill="var(--pr)" font-size="13" font-weight="800">الفلج</text>`;$('#wh').innerHTML=h})();
+(function(){const cx=300,cy=300,R=288,r0=72,K=['#c27a0e','#c8501c','#a37608','#2f4f8f','#2f8049','#5b4596','#b0620f','#243d70'];let h='';
+ROT.forEach((r,i)=>{const a0=(-90+i*45)*Math.PI/180,a1=a0+Math.PI/4,am=(a0+a1)/2,P=(a,q)=>(cx+q*Math.cos(a)).toFixed(1)+' '+(cy+q*Math.sin(a)).toFixed(1);
+const w=r[0].startsWith('قضيان')?[r[0].slice(0,9),r[0].slice(10)]:[r[0]],tm=fm(r[1]).replace(':00','')+' - '+fm(r[1]+3).replace(':00',''),L=w.concat([tm]),lx=cx+188*Math.cos(am),ly=cy+188*Math.sin(am),np=P(am,262).split(' ');
+h+=`<path data-s="${r[1]}" d="M${P(a0,R)}A${R} ${R} 0 0 1 ${P(a1,R)}L${P(a1,r0)}A${r0} ${r0} 0 0 0 ${P(a0,r0)}Z" fill="${K[i]}" stroke="var(--card)" stroke-width="3"/><circle cx="${np[0]}" cy="${np[1]}" r="13" fill="#fff" opacity=".9"/><text x="${np[0]}" y="${np[1]}" text-anchor="middle" dominant-baseline="central" fill="#222" font-size="16" font-weight="800">${i+1}</text><text x="${lx.toFixed(1)}" y="${(ly-(L.length-1)*11).toFixed(1)}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="21" font-weight="800" stroke="#0004" stroke-width="3" paint-order="stroke">${L.map((t,j)=>`<tspan x="${lx.toFixed(1)}" dy="${j?(j==L.length-1?24:22):0}"${j==L.length-1?' font-size="16" font-weight="700" fill="#ffe9a8"':''}>${t}</tspan>`).join('')}</text>`});
+h+=`<circle cx="${cx}" cy="${cy}" r="${r0-4}" fill="var(--card)" stroke="var(--gd)" stroke-width="4"/><text x="${cx}" y="${cy-10}" text-anchor="middle" fill="var(--pr)" font-size="22" font-weight="800">دوران</text><text x="${cx}" y="${cy+18}" text-anchor="middle" fill="var(--pr)" font-size="22" font-weight="800">الفلج</text>`;$('#wh').innerHTML=h})();
+(function(){const cx=300,cy=300,R=288,r0=72,K=['#c27a0e','#c8501c','#a37608','#2f4f8f','#2f8049','#5b4596','#b0620f','#243d70'],sh=x=>{x=((x%24)+24)%24;return((x%12)||12)+' '+(x>=12?'م':'ص')};let h='';
+ROT.forEach((r,i)=>{const a0=(-90+i*45)*Math.PI/180,a1=a0+Math.PI/4,am=(a0+a1)/2,P=(a,q)=>(cx+q*Math.cos(a)).toFixed(1)+' '+(cy+q*Math.sin(a)).toFixed(1);
+const w=r[0].startsWith('قضيان')?[r[0].slice(0,9),r[0].slice(10)]:[r[0]],tm='من '+sh(r[1])+' إلى '+sh(r[1]+3),n=w.length+1,lx=(cx+190*Math.cos(am)).toFixed(1),ly=cy+190*Math.sin(am),y0=ly-(n-1)*15,np=P(am,264).split(' ');
+h+=`<path data-s="${r[1]}" d="M${P(a0,R)}A${R} ${R} 0 0 1 ${P(a1,R)}L${P(a1,r0)}A${r0} ${r0} 0 0 0 ${P(a0,r0)}Z" fill="${K[i]}" stroke="var(--card)" stroke-width="3"/><circle cx="${np[0]}" cy="${np[1]}" r="12" fill="#fff" opacity=".9"/><text x="${np[0]}" y="${np[1]}" text-anchor="middle" dominant-baseline="central" fill="#222" font-size="15" font-weight="800">${i+1}</text>`+
+`<rect x="${lx-62}" y="${(y0-13).toFixed(1)}" width="124" height="26" rx="13" fill="#000" opacity=".3"/><text direction="rtl" x="${lx}" y="${y0.toFixed(1)}" text-anchor="middle" dominant-baseline="central" fill="#ffe9a8" font-size="15" font-weight="700">${tm}</text>`+w.map((t,j)=>`<text direction="rtl" x="${lx}" y="${(y0+(j+1)*30).toFixed(1)}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="21" font-weight="800">${t}</text>`).join('')});
+h+=`<circle cx="${cx}" cy="${cy}" r="${r0-4}" fill="var(--card)" stroke="var(--gd)" stroke-width="4"/><text x="${cx}" y="${cy-10}" text-anchor="middle" fill="var(--pr)" font-size="22" font-weight="800">دوران</text><text x="${cx}" y="${cy+18}" text-anchor="middle" fill="var(--pr)" font-size="22" font-weight="800">الفلج</text>`;$('#wh').innerHTML=h})();
+// today & clock
+function tick(){const d=new Date(),h=d.getHours();$('#clk').textContent=((h%12)||12)+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0')+' '+(h>=12?'م':'ص');
+document.querySelectorAll('#wh path').forEach(p=>{const s=+p.dataset.s;p.classList.toggle('hi',h>=s&&h<s+3)})}
+(function(){const d=new Date();$('#gd').textContent=d.toLocaleDateString('ar-u-nu-latn-ca-gregory',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+const r=rows.find(x=>dk(x.d)==dk(tdy));const t=Date.UTC(d.getFullYear(),d.getMonth(),d.getDate());let f,i=Math.round((t-T0)/DAY);i=((i%20)+20)%20;f=r?r.f:DN[i%10]+(i<10?' (A)':' (B)');
+$('#fd').textContent=f;$('#ti').innerHTML=r&&r.s?`💧 يوم سقي: ${r.s} — ${r.a} — ${r.tm}`:'<span class="al">⚠ تنبيه</span><b>اليوم بدون سقي</b>'})();
+// calc
+function c1(){const n=an($('#a1').value);$('#r1').textContent=n?(()=>{const m=n*30;return`${m} دقيقة = ${Math.floor(m/60)} ساعة و${m%60} دقيقة`})():'أدخل عدد الآثار'}
+function c2(){const n=an($('#a2').value),t=$('#t2').value;if(!n||!t){$('#r2').textContent='أدخل البيانات';return}const[h,m]=t.split(':').map(Number),e=h*60+m+n*30;$('#r2').textContent=`يبدأ ${fh(h,m)} وينتهي ${fh(Math.floor(e/60),e%60)}`}
+['#a1'].forEach(s=>$(s).oninput=c1);['#a2','#t2'].forEach(s=>$(s).oninput=c2);c2();
+$('#nt2').innerHTML=['A','B'].map((c,ci)=>{const o=ci*10;return `<div class="card cy cy${c}"><h2>${c=='A'?'🔵':'🟣'} دورة ${c}</h2><div style="overflow:visible"><table style="min-width:0"><thead><tr><th>#</th><th>اليوم</th><th>السقي</th></tr></thead><tbody>`+DN.map((n,i)=>{const b=BASE[o+i];return `<tr class="${b?'wt':''}"><td>${i+1}</td><td><b>${n}</b></td><td>${b?`<span class="dr">💧 يوم سقي — ${at(b[1])}</span><div class="sm">${calc(ROT[b[0]][0],at(b[1])).s}</div>`:'<span class="sm">بدون سقي</span>'}</td></tr>`}).join('')+`</tbody></table></div></div>`}).join('')+'<p class="sm" style="grid-column:1/-1;text-align:center">💧 = يوم سقي (الوقت المذكور لأول دورة، ثم يتغير كل 20 يومًا حسب التسلسل)</p>';
+(function(){const cl=(x,k)=>{const b=BASE[x];return `<td class="${b?k:''}"><b>${DN[x%10]}</b>`+(b?`<div class="dr">💧 يوم سقي — ${at(b[1])}</div>`:'<div class="sm">بدون سقي</div>')+'</td>'};
+$('#nt2').innerHTML='<div class="card cy2" style="grid-column:1/-1;max-width:860px;width:100%;margin:auto;padding:0;overflow:hidden"><table><thead><tr><th class="n">#</th><th class="ha">🔵 دورة A</th><th class="hb">🟣 دورة B</th></tr></thead><tbody>'+DN.map((n,i)=>`<tr><td><b>${i+1}</b></td>${cl(i,'wa')}${cl(i+10,'wb')}</tr>`).join('')+'</tbody></table></div><p class="sm" style="grid-column:1/-1;text-align:center">💧 = يوم سقي</p>'})();
+(function(){const mod=(a,b)=>((a%b)+b)%b,p2=x=>String(x).padStart(2,'0');
+const pd=s=>{const n=dg(s).match(/\d+/g);if(!n||n.length<3)return null;let d,m,y;if(n[0].length==4){y=+n[0];m=+n[1];d=+n[2]}else{d=+n[0];m=+n[1];y=+n[2]}if(y<1000||y>9999)return null;const t=Date.UTC(y,m-1,d),o=new Date(t);return o.getUTCFullYear()==y&&o.getUTCMonth()==m-1&&o.getUTCDate()==d?t:null};
+const ds=t=>{const o=new Date(t);return p2(o.getUTCDate())+'/'+p2(o.getUTCMonth()+1)+'/'+o.getUTCFullYear()};
+function info(t){const n=Math.round((t-T0)/DAY),c=Math.floor(n/20),i=n-20*c,o={w:WD[new Date(t).getUTCDay()],f:DN[i%10]+(i<10?' (A)':' (B)'),irr:0},b=BASE[i];if(b){const x=calc(ROT[mod(b[0]+c,8)][0],at(b[1]));o.irr=1;o.s=x.s;o.a=at(b[1]);o.tm=x.tm}return o}
+function go(){const t=pd($('#qdd').value+'/'+$('#qmm').value+'/'+$('#qyy').value);if(t==null){$('#qr').innerHTML='<span class="al">⚠ تنبيه</span><b>اكتب يومًا وسنة صحيحين واختر الشهر (مثال: 15 مارس 2030)</b>';$('#qlb').innerHTML='';$('#qt').textContent='';return}
+const o=info(t);$('#qr').innerHTML=`<div class="qh">${o.w} — <span dir="ltr">${ds(t)}</span></div><div class="qf">يوم الفلج: <b class="pill">${o.f}</b></div>`+(o.irr?`<div class="qi">💧 يوم سقي — ${o.a}<br>${o.s}<br>${o.tm}</div>`:'<div class="qi"><span class="al">⚠ تنبيه</span><b>هذا اليوم بدون سقي</b></div>');
+const e=new Date(t);e.setUTCFullYear(e.getUTCFullYear()+ +$('#qy').value);const en=e.getTime();let h='',c=0;
+for(let x=t;x<=en;x+=DAY){const k=info(x);if(!k.irr)continue;c++;h+=`<tr class="irr"><td dir="ltr">${ds(x)}</td><td>${k.w}</td><td>${k.f}</td><td>${k.s}</td><td>${k.a}</td><td>${k.tm}</td></tr>`}
+$('#qt').textContent=`💧 أيام السقي من ${ds(t)} إلى ${ds(en)} (${c} يومًا)`;$('#qlb').innerHTML=h}
+{const n=new Date();$('#qdd').value=n.getDate();$('#qmm').value=n.getMonth()+1;$('#qyy').value=n.getFullYear()}const lv=()=>{if(dg($('#qyy').value).trim().length==4)go()};$('#qb').onclick=go;$('#qy').onchange=go;$('#qmm').onchange=go;['#qdd','#qyy'].forEach(s=>{$(s).oninput=lv;$(s).onkeydown=e=>{if(e.key=='Enter')go()}});go()})();
+(function(){const mod=(a,b)=>((a%b)+b)%b,p2=x=>String(x).padStart(2,'0');
+const pd=s=>{const n=dg(s).match(/\d+/g);if(!n||n.length<3)return null;const d=+n[0],m=+n[1],y=+n[2];if(y<1000||y>9999)return null;const t=Date.UTC(y,m-1,d),o=new Date(t);return o.getUTCFullYear()==y&&o.getUTCMonth()==m-1&&o.getUTCDate()==d?t:null};
+const ds=t=>{const o=new Date(t);return p2(o.getUTCDate())+'/'+p2(o.getUTCMonth()+1)+'/'+o.getUTCFullYear()};
+function info(t){const n=Math.round((t-T0)/DAY),c=Math.floor(n/20),i=n-20*c,o={w:WD[new Date(t).getUTCDay()],f:DN[i%10]+(i<10?' (A)':' (B)'),irr:0},b=BASE[i];if(b){const x=calc(ROT[mod(b[0]+c,8)][0],at(b[1]));o.irr=1;o.s=x.s;o.a=at(b[1]);o.tm=x.tm}return o}
+const gt=(a,b,c)=>pd($(a).value+'/'+$(b).value+'/'+$(c).value);
+const err=m=>{$('#qr').innerHTML='<span class="al">⚠ تنبيه</span><b>'+m+'</b>';$('#qlb').innerHTML='';$('#qt').textContent=''};
+function go(){const t=gt('#qdd','#qmm','#qyy'),en=gt('#qd2','#qm2','#qy2');
+if(t==null||en==null)return err('اكتب اليوم والسنة بشكل صحيح واختر الشهر في "من تاريخ" و"إلى تاريخ"');
+if(en<t)return err('تاريخ النهاية يجب أن يكون بعد تاريخ البداية');
+if((en-t)/DAY>73050)return err('المدة أطول من 200 سنة، قصّر الفترة');
+const all=$('#qy').value=='all';let h='',ci=0,tot=0,rc=0;
+for(let x=t;x<=en;x+=DAY){tot++;const k=info(x);if(k.irr)ci++;if(!k.irr&&!all)continue;if(++rc>4000)continue;
+h+=k.irr?`<tr class="irr"><td dir="ltr">${ds(x)}</td><td>${k.w}</td><td>${k.f}</td><td>${k.s}</td><td>${k.a}</td><td>${k.tm}</td></tr>`:`<tr><td dir="ltr">${ds(x)}</td><td>${k.w}</td><td>${k.f}</td><td colspan="3" class="sm">بدون سقي</td></tr>`}
+$('#qr').innerHTML=`<div class="qh">من <span dir="ltr">${ds(t)}</span> إلى <span dir="ltr">${ds(en)}</span></div><div class="qi">إجمالي الأيام: <b>${tot}</b><br>💧 أيام السقي: <b>${ci}</b><br>أيام بدون سقي: <b>${tot-ci}</b></div>`;
+$('#qt').textContent=`💧 نتائج الحساب من ${ds(t)} إلى ${ds(en)}`+(rc>4000?' (عُرض أول 4000 صف)':'');$('#qlb').innerHTML=h}
+$('#qm2').innerHTML=$('#qmm').innerHTML;const n=new Date();$('#qdd').value=n.getDate();$('#qmm').value=n.getMonth()+1;$('#qyy').value=n.getFullYear();$('#qd2').value=n.getDate();$('#qm2').value=n.getMonth()+1;$('#qy2').value=n.getFullYear()+1;
+const lv=()=>{if(dg($('#qyy').value).trim().length==4&&dg($('#qy2').value).trim().length==4)go()};
+['#qdd','#qyy','#qd2','#qy2'].forEach(s=>{$(s).oninput=lv;$(s).onkeydown=e=>{if(e.key=='Enter')go()}});['#qmm','#qm2','#qy'].forEach(s=>$(s).onchange=go);$('#qb').onclick=go;go()})();
+(function(){const mt=$('.tw'),fx=document.createElement('div');fx.id='fx';fx.style.display='none';mt.parentNode.insertBefore(fx,mt);
+fx.innerHTML='<div class="fxh">📆 حساب الفلج لأيام أخرى</div>';[...$('#p5').children].forEach(c=>fx.appendChild(c));$('#p5').remove();
+const tg=()=>{const r=$('#sm').value=='r';fx.style.display=r?'':'none';mt.style.display=r?'none':'';['#sq','#sf','#cn'].forEach(s=>$(s).style.display=r?'none':'')};$('#sm').addEventListener('change',tg)})();
+(function(){const D=()=>{if($('#sm').value=='r'){const h=[...document.querySelectorAll('#fx .ql thead th')].map(x=>x.textContent);return{t:$('#qt').textContent||'حساب الفلج لأيام أخرى',h,rows:[...document.querySelectorAll('#qlb tr')].map(tr=>{const c=[...tr.children].map(td=>td.textContent.trim());while(c.length<h.length)c.push('');return{c,i:tr.classList.contains('irr')}})}}
+return{t:'جدول دوران أوقات الفلج — '+$('#cn').textContent,h:['#','التاريخ الميلادي','يوم الأسبوع','يوم الفلج','وقت السقي','عدد الآثار','الوقت','ملاحظات'],rows:[...document.querySelectorAll('#tb tr')].map(tr=>({c:[...tr.children].slice(0,8).map(td=>td.textContent.trim()),i:tr.classList.contains('irr')}))}};
+async function sv(name,data){try{const d=window.claude?await claude.use('downloads'):null;if(d){await d.save({filename:name,data});ts('تم الحفظ');return}}catch(e){ts(e&&e.code=='declined'?'تم الإلغاء':'تعذر الحفظ');return}
+try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data]));a.download=name;document.body.appendChild(a);a.click();a.remove()}catch(x){ts('تعذر الحفظ')}}
+$('#ex').onclick=()=>{const d=D();if(!d.rows.length)return ts('لا توجد بيانات للتصدير');const n=d.h.length,aoa=[[d.t],['تصميم أحمد بن سعيد الشبيبي'],[],d.h].concat(d.rows.map(r=>r.c.map((v,k)=>k==0&&/^\d+$/.test(v)?+v:v)));
+if(window.XLSX){const ws=XLSX.utils.aoa_to_sheet(aoa);ws['!cols']=d.h.map((x,k)=>({wch:Math.min(40,Math.max(String(x).length,...d.rows.map(r=>String(r.c[k]).length))+4)}));ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:n-1}},{s:{r:1,c:0},e:{r:1,c:n-1}}];ws['!autofilter']={ref:XLSX.utils.encode_range({s:{r:3,c:0},e:{r:aoa.length-1,c:n-1}})};const wb=XLSX.utils.book_new();wb.Workbook={Views:[{RTL:true}]};XLSX.utils.book_append_sheet(wb,ws,'الفلج');sv('falaj.xlsx',XLSX.write(wb,{bookType:'xlsx',type:'array'}))}
+else sv('falaj.csv','\ufeff'+aoa.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n'))};
+$('#pr').onclick=()=>{try{window.print()}catch(e){}ts('إن لم تظهر نافذة الطباعة استخدم زر «ملف للطباعة»')};
+$('#pf').onclick=()=>{const d=D();if(!d.rows.length)return ts('لا توجد بيانات للطباعة');const e=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const html='<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>تقويم الفلج</title><style>@page{size:A4 landscape;margin:10mm}body{font-family:Tahoma,Arial,sans-serif;margin:12px;color:#000}h1{text-align:center;font-size:20px;margin:0}.c{text-align:center;color:#8a6a1c;font-weight:bold;margin:4px 0 10px}p{text-align:center;font-weight:bold}table{width:100%;border-collapse:collapse}th{background:#0b6b4f;color:#fff;padding:6px;font-size:13px}td{border:1px solid #bbb;padding:5px;text-align:center;font-size:13px}tr.i td{background:#e3f4ec}thead{display:table-header-group}tr{break-inside:avoid}button{display:block;margin:0 auto 12px;padding:10px 26px;font-size:16px}.w{overflow-x:auto}@media print{button{display:none}th,tr.i td{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body><button onclick="print()">🖨 طباعة</button><h1>تقويم وحساب دوران أوقات الفلج</h1><div class="c">تصميم أحمد بن سعيد الشبيبي</div><p>'+e(d.t)+'</p><div class="w"><table><thead><tr>'+d.h.map(x=>'<th>'+e(x)+'</th>').join('')+'</tr></thead><tbody>'+d.rows.map(r=>'<tr'+(r.i?' class="i"':'')+'>'+r.c.map(x=>'<td>'+e(x)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div></body></html>';sv('falaj-print.html',html)}})();
+(function(){const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function gd(){const r=['r','q'].includes($('#sm').value),tb=(r?$('#qlb'):$('#tb')).closest('table'),h=[...tb.querySelectorAll('thead th')].filter(x=>!x.classList.contains('ed')).map(x=>x.textContent.trim()),f=[],b=[...tb.querySelectorAll('tbody tr')].map(tr=>{f.push(tr.classList.contains('irr'));const o=[];[...tr.children].filter(x=>!x.classList.contains('ed')).forEach(td=>{o.push(td.textContent.trim());for(let i=1;i<(td.colSpan||1);i++)o.push('')});return o});return{h,b,f,t:r?($('#qt').textContent||'حساب الفلج لأيام أخرى'):'جدول دوران أوقات الفلج'}}
+async function dl(name,data,mime){let d=null;try{d=window.claude?await claude.use('downloads'):null}catch(e){}
+if(d){await d.save({filename:name,data});return}
+const a=document.createElement('a');a.href=URL.createObjectURL(data instanceof Blob?data:new Blob([data],{type:mime}));a.download=name;document.body.appendChild(a);a.click();a.remove()}
+const er=e=>ts(e&&e.code=='declined'?'تم إلغاء الحفظ':'تعذّر حفظ الملف في هذا العرض');
+$('#ex').onclick=async()=>{const g=gd();if(!g.b.length)return ts('لا توجد نتائج للتصدير');
+try{if(window.XLSX){const aoa=[[g.t],[],g.h,...g.b],ws=XLSX.utils.aoa_to_sheet(aoa);ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:Math.max(g.h.length-1,0)}}];ws['!cols']=g.h.map((x,i)=>({wch:Math.min(36,Math.max(8,x.length+2,...g.b.map(r=>(r[i]||'').length+2)))}));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'الفلج');wb.Workbook={Views:[{RTL:true}]};await dl('falaj-schedule.xlsx',XLSX.write(wb,{bookType:'xlsx',type:'array'}),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')}
+else{const q=v=>'"'+String(v).replace(/"/g,'""')+'"';await dl('falaj-schedule.csv','\ufeff'+[g.h,...g.b].map(r=>r.map(q).join(',')).join('\r\n'),'text/csv')}}catch(e){er(e)}};
+function ph(){const g=gd();return`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(g.t)}</title><style>*{-webkit-print-color-adjust:exact;print-color-adjust:exact}body{font-family:Tahoma,Arial,sans-serif;margin:12px;color:#111}h1{text-align:center;font-size:20px;margin:0}.s{text-align:center;color:#555;font-size:12px;margin:3px 0 10px}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#1f3b57;color:#fff;padding:6px;border:1px solid #1f3b57}td{border:1px solid #999;padding:5px;text-align:center}tr.i td{background:#e6f0fa}thead{display:table-header-group}tr{page-break-inside:avoid}.bar{text-align:center;margin:10px}.bar button{font:inherit;padding:10px 26px;border:0;border-radius:10px;background:#1f3b57;color:#fff}@media print{.bar{display:none}@page{size:A4;margin:10mm}}</style></head><body><div class="bar"><button onclick="print()">🖨 طباعة</button></div><h1>${esc(g.t)}</h1><div class="s">تصميم أحمد بن سعيد الشبيبي — التاريخ المرجعي 20/08/2026 (السبت 3 A)</div><table><thead><tr>${g.h.map(x=>'<th>'+esc(x)+'</th>').join('')}</tr></thead><tbody>${g.b.map((r,i)=>'<tr'+(g.f[i]?' class="i"':'')+'>'+r.map(x=>'<td>'+esc(x)+'</td>').join('')+'</tr>').join('')}</tbody></table><script>window.onload=function(){setTimeout(function(){print()},500)}<\/script></body></html>`}
+$('#pr').onclick=()=>{$('#pm').style.display='flex'};$('#pp3').onclick=()=>$('#pm').style.display='none';
+$('#pp1').onclick=()=>{$('#pm').style.display='none';setTimeout(()=>{try{window.print()}catch(e){ts('استخدم الملف الجاهز للطباعة')}},250)};
+$('#pp2').onclick=async()=>{$('#pm').style.display='none';if(!gd().b.length)return ts('لا توجد نتائج للطباعة');try{await dl('falaj-print.html',ph(),'text/html')}catch(e){er(e)}}})();
+(function(){const fx=$('#fx'),mt=$('#tb').closest('.tw');function ap(){const v=$('#sm').value,q=v=='q';if(q){fx.style.display='';mt.style.display='none';['#sq','#sf','#cn'].forEach(s=>$(s).style.display='none')}
+$('#fx .g2').style.display=q?'none':'';$('#fx p.sm').style.display=q?'none':'';$('#fx .fxh').textContent=q?'🔎 بحث من تاريخ إلى تاريخ':'📆 حساب الفلج لأيام أخرى'}
+$('#sm').addEventListener('change',ap)})();
+(function(){const D=[
+{"d": "الجمعة (A)", "t": "ثلاث آثار", "q": [["سعيد الرواحي (قعد)", "نصف أثر"]], "o": [["أولا", "سعيد الرواحي", "نصف أثر", "من 5:45 إلى 6:05"], ["ثانيا", "ورثة حمد بن علي", "أثران ونصف", "من 6:05 إلى 7:15"], ["ثالثا", "أم حمير", "أثر واحد"], ["رابعا", "عامر بن راشد", "أثران"]]}, {"d": "الأحد (B)", "t": "ست آثار", "q": [["سليم بن عامر (قعد)", "أثر واحد"], ["سلطان بن سالم (قعد)", "أثران"]], "o": [["أولا", "سليم بن عامر (صوب انطالة بيته)", "أثر واحد", "يرده الساعة 2:45"], ["ثانيا", "ورثة حمد بن علي", "3 آثار", "نرده الساعة 3:15"], ["ثالثا", "سلطان بن سالم", "أثران"]]}, {"d": "السبت الآخرية (A)", "t": "ست آثار", "o": [["أولا", "ورثة حمد بن علي", "3.5 أثر", "الساعة 2:53"], ["ثانيا", "عامل العم عامر (لانطالة حمد)", "2 أثر"], ["ثالثا", "جلبة الكفن (وقف)", "نصف أثر"]]}, {"d": "الأحد (A)", "t": "أربع آثار", "q": [["سلطان بن سالم (قعد)", "أثران"]], "o": [["أولا", "أحمد الرمحي", "2 أثر", "الساعة 12:00"], ["ثانيا", "ورثة حمد بن علي", "أثران", "الساعة 12:53"], ["ثالثا", "سلطان بن سالم (قعد)", "أثران"]]}, {"d": "الجمعة (B)", "t": "ثلاثة ونصف أثر", "q": [["سعيد الرواحي (قعد)", "نصف أثر"]], "o": [["أولا", "عمران (لورثة عبدالله بن علي)", "2.5 أثر"], ["ثانيا", "سعيد الرواحي (قعد)", "نصف أثر"], ["ثالثا", "ورثة حمد بن علي", "ثلاث آثار"]]}, {"d": "الأربعاء (A)", "t": "ثمان آثار", "q": [["سليمان بن حمد (قعد)", "3 آثار"], ["سيف بن حمود (قعد)", "3 آثار"]], "o": [["أولا", "ورثة حمد بن علي", "أثران", "الساعة 9:00 — مطابق فلج العم عامر"], ["ثانيا", "العم عامر", "—"]], "o2": [["أولا", "سليمان بن حمد", "3 آثار"], ["ثانيا", "سيف بن حمود", "3 آثار"]], "n2": "🔁 الست آثار الباقيات (قعد)"}, {"d": "البادة (B)", "t": "أثر ونصف", "o": [["أولا", "علي الرمحي", "3 آثار"], ["ثانيا", "ورثة حمد بن علي", "أثر ونصف", "الساعة 4:23"], ["ثالثا", "أولاد خلفان بن سيف", "أثر ونصف"]]}];
+const e=t=>`<td class="e" contenteditable="false" spellcheck="false">${t}</td>`;
+const ot=(o,h)=>`<div><h3>${h}</h3><table class="kt"><thead><tr><th>الترتيب</th><th>الاسم</th><th>الأثر</th><th>الوقت / ملاحظات</th></tr></thead><tbody>${o.map(r=>`<tr><td><span class="ord">${r[0]}</span></td>${e(r[1])}${e(r[2])}${e(r[3]||'—')}</tr>`).join('')}</tbody></table></div>`;
+$('#kd').innerHTML='<div class="fxh" style="background:linear-gradient(135deg,#0b4f6c,#1d7a9a)">📜 الأدوار في السقي والقعد</div>'+D.map(x=>`<div class="card kd"><div class="dh"><b>${x.d}</b><span>${x.t}</span></div><div class="kb">`+(x.q?`<div><h3>📋 القعد</h3><table class="kt"><thead><tr><th>صاحب القعد / الحصة</th><th>عدد الآثار</th></tr></thead><tbody>${x.q.map(r=>`<tr>${e(r[0])}${e(r[1])}</tr>`).join('')}</tbody></table></div>`:'')+ot(x.o,'🔁 ترتيب الأدوار')+(x.o2?ot(x.o2,x.n2):'')+'</div></div>').join('')+'<p class="sm" style="text-align:center">يمكن تعديل الخلايا بعد فتح التعديل بالأيقونة 🔒 (التعديل مؤقت في الجلسة)</p>';
+new MutationObserver(()=>{const on=document.body.classList.contains('open-ed');document.querySelectorAll('#p6 td.e').forEach(t=>t.contentEditable=on)}).observe(document.body,{attributes:true,attributeFilter:['class']})})();
+render();tick();setInterval(tick,1000);
+</script>
+</body>
+</html>
